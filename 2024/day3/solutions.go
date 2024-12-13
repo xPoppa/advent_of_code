@@ -2,16 +2,19 @@ package day3
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
-func parseInput() []string {
+func ParseInput(filename string) []string {
 	home := os.Getenv("HOME")
-	f, err := os.Open(home + "/go/advent_of_code/2024/day3/input.txt")
+	f, err := os.Open(home + "/go/advent_of_code/2024/day3/" + filename)
 	if err != nil {
 		log.Fatal("Errored out while reading file: ", err)
 	}
@@ -33,8 +36,8 @@ type ToMultiply struct {
 	secondNum int
 }
 
-func Part1() {
-	input := parseInput()
+func Part1(filename string) int {
+	input := ParseInput(filename)
 	// "mul([0-9],[0-9])" is only valid.
 	// Can i fix this with a parser? Or just regex?
 	mult := []ToMultiply{}
@@ -42,6 +45,33 @@ func Part1() {
 		start := strings.Index(str, "mul(")
 		if start == -1 {
 			continue
+		}
+		//		reader := strings.NewReader(str)
+		//		r, _, _ := reader.ReadRune()
+		//		if r == 'm' {
+		//			r,_,_ = reader.ReadRune()
+		//			if r == 'u' {
+		//
+		//			}
+		//		}
+		fmt.Println("The rest of the string with the beginning part", str[start+4:])
+		line := str
+		for {
+			reader := strings.NewReader(line[start+4:])
+			toMul, err := readMul(reader)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				start = strings.Index(line[start+4:], "mul(")
+				line = line[start:4]
+			}
+			mult = append(mult, toMul)
+
+		}
+
+		for _, r := range str[start+4:] {
+			unicode.IsDigit(r)
 		}
 		firstNumStr := rune(str[start+1])
 		fmt.Println("The first number: ", firstNumStr)
@@ -54,7 +84,50 @@ func Part1() {
 			mult = append(mult, ToMultiply{firstNum: firstNum, secondNum: secondNum})
 		}
 
-		newStr := str[start+5:]
 	}
+	return 0
+
+}
+
+func readMul(r io.RuneReader) (ToMultiply, error) {
+	firstNum, _, err := r.ReadRune()
+	if err != nil {
+		return ToMultiply{}, err
+	}
+	if !unicode.IsDigit(firstNum) {
+		panic("err")
+	}
+	comma, _, err := r.ReadRune()
+	if err != nil {
+		return ToMultiply{}, err
+	}
+	if comma != ',' {
+		panic("err")
+	}
+	sndNum, _, err := r.ReadRune()
+	if err != nil {
+		return ToMultiply{}, err
+	}
+	if !unicode.IsDigit(sndNum) {
+		panic("err")
+	}
+	rightParen, _, err := r.ReadRune()
+	if err != nil {
+		return ToMultiply{}, err
+	}
+	if rightParen != ')' {
+		return ToMultiply{}, errors.New("No right Paren")
+	}
+
+	fNum, err := strconv.Atoi(string(firstNum))
+	if err != nil {
+		return ToMultiply{}, err
+	}
+	sNum, err := strconv.Atoi(string(sndNum))
+	if err != nil {
+		return ToMultiply{}, err
+	}
+
+	return ToMultiply{firstNum: fNum, secondNum: sNum}, nil
 
 }
