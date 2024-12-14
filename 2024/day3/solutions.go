@@ -42,74 +42,69 @@ func Part1(filename string) int {
 	// Can i fix this with a parser? Or just regex?
 	mult := []ToMultiply{}
 	for _, str := range input {
-		start := strings.Index(str, "mul(")
-		if start == -1 {
+		before, after, found := strings.Cut(str, "mul(")
+		fmt.Println("The after is: ", after)
+		fmt.Println("Before: ", before)
+		if !found {
+			fmt.Println("Miauw")
 			continue
 		}
-		//		reader := strings.NewReader(str)
-		//		r, _, _ := reader.ReadRune()
-		//		if r == 'm' {
-		//			r,_,_ = reader.ReadRune()
-		//			if r == 'u' {
-		//
-		//			}
-		//		}
-		fmt.Println("The rest of the string with the beginning part", str[start+4:])
-		line := str
+		line := after
+		fmt.Println("The full line: \n\t", str)
 		for {
-			reader := strings.NewReader(line[start+4:])
+			fmt.Println("The line I am checking: \n\t", line)
+			reader := bufio.NewReader(strings.NewReader(line))
 			toMul, err := readMul(reader)
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
-				start = strings.Index(line[start+4:], "mul(")
-				line = line[start:4]
+
+				_, line, found = strings.Cut(line, "mul(")
+				if !found {
+					break
+				}
+				fmt.Println("ERROR After assigning new line: ", line)
+				continue
 			}
 			mult = append(mult, toMul)
-
+			_, line, found = strings.Cut(line, "mul(")
+			fmt.Println("After checking assigning new line inside NORMAL")
 		}
-
-		for _, r := range str[start+4:] {
-			unicode.IsDigit(r)
-		}
-		firstNumStr := rune(str[start+1])
-		fmt.Println("The first number: ", firstNumStr)
-		comma := rune(str[start+2])
-		secondNumStr := rune(str[start+3])
-		rightParen := rune(str[start+4])
-		firstNum, err := strconv.Atoi(string(firstNumStr))
-		secondNum, err := strconv.Atoi(string(secondNumStr))
-		if comma == ',' && err == nil && rightParen == ')' {
-			mult = append(mult, ToMultiply{firstNum: firstNum, secondNum: secondNum})
-		}
-
 	}
-	return 0
-
+	res := 0
+	for _, mul := range mult {
+		res += mul.Product()
+	}
+	return res
 }
 
-func readMul(r io.RuneReader) (ToMultiply, error) {
+func (m ToMultiply) Product() int {
+	fmt.Printf("%d * %d\n", m.firstNum, m.secondNum)
+	return m.firstNum * m.secondNum
+}
+
+func readMul(r *bufio.Reader) (ToMultiply, error) {
 	firstNum, _, err := r.ReadRune()
 	if err != nil {
 		return ToMultiply{}, err
 	}
 	if !unicode.IsDigit(firstNum) {
-		panic("err")
+		return ToMultiply{}, errors.New("Not the right character")
 	}
 	comma, _, err := r.ReadRune()
 	if err != nil {
 		return ToMultiply{}, err
 	}
 	if comma != ',' {
-		panic("err")
+		return ToMultiply{}, errors.New("Not the right character")
 	}
 	sndNum, _, err := r.ReadRune()
 	if err != nil {
 		return ToMultiply{}, err
 	}
 	if !unicode.IsDigit(sndNum) {
-		panic("err")
+		return ToMultiply{}, errors.New("Not the right character")
 	}
 	rightParen, _, err := r.ReadRune()
 	if err != nil {
@@ -127,7 +122,5 @@ func readMul(r io.RuneReader) (ToMultiply, error) {
 	if err != nil {
 		return ToMultiply{}, err
 	}
-
 	return ToMultiply{firstNum: fNum, secondNum: sNum}, nil
-
 }
