@@ -3,6 +3,9 @@ package day3
 import (
 	"bufio"
 	"errors"
+	"fmt"
+
+	//"fmt"
 	"io"
 	"log"
 	"os"
@@ -33,9 +36,10 @@ func ParseInput(filename string) []string {
 //xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 
 type ToMultiply struct {
-	firstNum   int
-	secondNum  int
-	isDisabled bool
+	firstNum  int
+	secondNum int
+	issaGo    bool
+	issaNoGo  bool
 }
 
 func Part1(filename string) int {
@@ -80,31 +84,50 @@ func Part2(filename string) int {
 	// Can i fix this with a parser? Or just regex?
 	mult := []ToMultiply{}
 	for _, str := range input {
-		before, after, found := strings.Cut(str, "mul(")
-		if !found {
-			continue
-		}
-		_, _, disable := strings.Cut(before, "don't()")
-		line := after
-		for {
-			reader := bufio.NewReader(strings.NewReader(line))
-			toMul, err := readMul(reader)
-			toMul.isDisabled = disable
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				before, line, found = strings.Cut(line, "mul(")
-				if !found {
-					break
-				}
-				_, _, disable = strings.Cut(line, "don't()")
-				continue
+		//lala := []rune{}
+		for i := range str {
+			if doState := str[i] == 'd' && str[i+1] == 'o' && str[i+2] == '(' && str[i+3] == ')'; doState {
+
 			}
 
-			mult = append(mult, toMul)
-			_, line, found = strings.Cut(line, "mul(")
-			_, _, disable = strings.Cut(line, "don't()")
+			//		before, after, found := strings.Cut(str, "mul(")
+			//		if !found {
+			//			continue
+			//		}
+			//		dontBefore, _, disable := strings.Cut(before, "don't()")
+			//		doBefore, _, enable := strings.Cut(before, "do()")
+			//		line := after
+			//		for {
+			//			reader := bufio.NewReader(strings.NewReader(line))
+			//			toMul, err := readMul(reader)
+			//			if len(dontBefore) > len(doBefore) {
+			//				toMul.issaGo = enable
+			//			}
+			//			if len(doBefore) > len(dontBefore) {
+			//				toMul.issaNoGo = disable
+			//			}
+			//			if len(doBefore) == len(dontBefore) && !enable && !disable {
+			//				toMul.issaGo = true
+			//			}
+			//			if err == io.EOF {
+			//				break
+			//			}
+			//			if err != nil {
+			//				before, line, found = strings.Cut(line, "mul(")
+			//				if !found {
+			//					break
+			//				}
+			//				dontBefore, _, disable = strings.Cut(line, "don't()")
+			//				doBefore, _, enable = strings.Cut(before, "do()")
+			//				continue
+			//			}
+			//
+			//			mult = append(mult, toMul)
+			//			before, line, found = strings.Cut(line, "mul(")
+			//			dontBefore, _, disable = strings.Cut(before, "don't()")
+			//			doBefore, _, enable = strings.Cut(before, "do()")
+			//		}
+			//	}
 		}
 	}
 	res := 0
@@ -116,10 +139,10 @@ func Part2(filename string) int {
 }
 
 func (m ToMultiply) Product() int {
-	if m.isDisabled {
-		return 1
+	if m.issaGo {
+		return m.firstNum * m.secondNum
 	}
-	return m.firstNum * m.secondNum
+	return 0
 }
 
 func readMul(r *bufio.Reader) (ToMultiply, error) {
