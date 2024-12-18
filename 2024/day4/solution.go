@@ -38,7 +38,12 @@ func findXMAS(line string) (res int) {
 }
 
 func makeHorizontal(lines []string) (horizontal []string) {
-	for _, line := range lines {
+	matrix := [][]rune{}
+
+	for y, line := range lines {
+		for x, ch := range line {
+			matrix[x][y] = ch
+		}
 
 	}
 }
