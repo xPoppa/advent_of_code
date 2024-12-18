@@ -84,58 +84,37 @@ func Part2(filename string) int {
 	// Can i fix this with a parser? Or just regex?
 	mult := []ToMultiply{}
 	for _, str := range input {
-		//lala := []rune{}
 		for i := range str {
-			if doState := str[i] == 'd' && str[i+1] == 'o' && str[i+2] == '(' && str[i+3] == ')'; doState {
+			doState := str[i] == 'd' && str[i+1] == 'o' && str[i+2] == '(' && str[i+3] == ')'
+			//dontState := str[i] == 'd' && str[i+1] == 'o' && str[i+2] == 'n' && str[i+3] == '\'' && str[i+4] == 't'
+			if doState {
+				newStr := str[i+4:]
+				_, after, found := strings.Cut(newStr, "mul(")
+				if !found {
+					continue
+				}
+				reader := bufio.NewReader(strings.NewReader(after))
+				toMul, err := readMul(reader)
+				toMul.issaGo = doState
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					continue
+				}
+				fmt.Println("Add to toMult slice: ", toMul)
+				mult = append(mult, toMul)
 
 			}
-
-			//		before, after, found := strings.Cut(str, "mul(")
-			//		if !found {
-			//			continue
-			//		}
-			//		dontBefore, _, disable := strings.Cut(before, "don't()")
-			//		doBefore, _, enable := strings.Cut(before, "do()")
-			//		line := after
-			//		for {
-			//			reader := bufio.NewReader(strings.NewReader(line))
-			//			toMul, err := readMul(reader)
-			//			if len(dontBefore) > len(doBefore) {
-			//				toMul.issaGo = enable
-			//			}
-			//			if len(doBefore) > len(dontBefore) {
-			//				toMul.issaNoGo = disable
-			//			}
-			//			if len(doBefore) == len(dontBefore) && !enable && !disable {
-			//				toMul.issaGo = true
-			//			}
-			//			if err == io.EOF {
-			//				break
-			//			}
-			//			if err != nil {
-			//				before, line, found = strings.Cut(line, "mul(")
-			//				if !found {
-			//					break
-			//				}
-			//				dontBefore, _, disable = strings.Cut(line, "don't()")
-			//				doBefore, _, enable = strings.Cut(before, "do()")
-			//				continue
-			//			}
-			//
-			//			mult = append(mult, toMul)
-			//			before, line, found = strings.Cut(line, "mul(")
-			//			dontBefore, _, disable = strings.Cut(before, "don't()")
-			//			doBefore, _, enable = strings.Cut(before, "do()")
-			//		}
-			//	}
 		}
+
 	}
+
 	res := 0
 	for _, mul := range mult {
 		res += mul.Product()
 	}
 	return res
-
 }
 
 func (m ToMultiply) Product() int {
