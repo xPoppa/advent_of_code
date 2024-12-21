@@ -1,6 +1,8 @@
 package day4
 
 import (
+	"fmt"
+
 	"github.com/xPoppa/aoc/2024/utils"
 )
 
@@ -12,7 +14,14 @@ func Part1(filename string) int {
 	return res
 }
 
-func countXMAS(lines []string, matrix map[Point]rune) (res int) {
+func (m Matrix) String() {
+	for k, v := range m {
+		fmt.Println("Point: ", k, "With value: ", v)
+	}
+
+}
+
+func countXMAS(lines []string, matrix Matrix) (res int) {
 	for y, line := range lines {
 		for x := range line {
 			// Horizontal left to right
@@ -63,8 +72,24 @@ func countXMAS(lines []string, matrix map[Point]rune) (res int) {
 			if matrix[dr1] == 'X' && matrix[dr2] == 'M' && matrix[dr3] == 'A' && matrix[dr4] == 'S' {
 				res++
 			}
-		}
 
+			// diagonal reverse reverse
+			drr1 := Point{x, y}
+			drr2 := Point{x + 1, y - 1}
+			drr3 := Point{x + 2, y - 2}
+			drr4 := Point{x + 3, y - 3}
+			if matrix[drr1] == 'X' && matrix[drr2] == 'M' && matrix[drr3] == 'A' && matrix[drr4] == 'S' {
+				res++
+			}
+			// diagonal reverse reverse reverse?
+			drrr4 := Point{x, y}
+			drrr3 := Point{x + 1, y - 1}
+			drrr2 := Point{x + 2, y - 2}
+			drrr1 := Point{x + 3, y - 3}
+			if matrix[drrr1] == 'X' && matrix[drrr2] == 'M' && matrix[drrr3] == 'A' && matrix[drrr4] == 'S' {
+				res++
+			}
+		}
 	}
 	return res
 }
@@ -85,11 +110,3 @@ type Point struct {
 }
 
 type Matrix map[Point]rune
-
-//[
-//[0.0,0.1,l,l,l,l,l,l,l],
-//[0.1,1.1,l,l,l,l,l,l,l],
-//[0.2,l,l,l,l,l,l,l,l],
-//[0.3,l,l,l,l,l,l,l,l],
-//[0.4,l,l,l,l,l,l,l,l]
-//]

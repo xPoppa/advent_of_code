@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/xPoppa/aoc/2024/day3"
+	"github.com/xPoppa/aoc/2024/day4"
 )
 
 func main() {
-	res := day3.Part2("input2.txt")
+	res := day4.Part1("day4/input.txt")
 	fmt.Println("The result is: ", res)
 }
